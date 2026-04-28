@@ -40,10 +40,7 @@ def modified_gauss_newton(problem, x0, M0=1e-3, L0=1e-6, max_iter=100, tol=1e-6,
         elif M_search == 2:
             M = max(M * 0.5, L0)
 
-        if np.linalg.norm(problem.F(x)) < tol:
-        # TBD
-        # if np.linalg.norm(problem.F(x)) < tol: <- czy to nie będzie bardziej poprawne kryterium stopu???
-        # po zmianie na to kryterium w niektórych przypadkach widzę poprawę zbieżności
+        if np.linalg.norm(J_k.T @ F_k) < tol and np.linalg.norm(h) < tol:
             print(f"Modified Gauss-Newton Converged in {k+1} iterations.")
             break  
 

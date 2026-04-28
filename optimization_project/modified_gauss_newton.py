@@ -1,5 +1,5 @@
 import numpy as np
-from subproblem import solve_subproblem
+from .subproblem import solve_subproblem
 
 def modified_gauss_newton(problem, x0, M0=1e-3, L0=1e-6, max_iter=100, tol=1e-6, M_search=2, 
                           return_history=False):

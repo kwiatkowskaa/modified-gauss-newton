@@ -22,14 +22,109 @@ class Problem(ABC):
         """Returns the proposed starting points defined by NIST."""
         pass
 
-    # def g(self, z):
-    #     pass
 
-    # def grad_g(self, z):
-    #     pass
+class DanWoodProblem(Problem):
+    """
+    Source: NIST
+    Level of Difficulty: Lower
+    Model Classification: Miscellaneous
+    Number of Parameters: 2
+    Number of Observations: 6
+    """
+    def __init__(self):
+        super().__init__(name="DanWood", n=2, m=6)
+
+        self.x_data = np.array([1.309, 1.471, 1.490, 1.565, 1.611, 1.680])
+        self.y_data = np.array([2.138, 3.421, 3.597, 4.340, 4.882, 5.660])
+
+    def model(self, b, x):
+        return b[0] * x**b[1]
+
+    def F(self, b):
+        return self.model(b, self.x_data) - self.y_data
+
+    def J(self, b):
+        x = self.x_data
+        J = np.zeros((self.m, self.n))
+
+        J[:,0] = x**b[1]
+        J[:,1] = b[0] * x**b[1] * np.log(x)
+
+        return J
+
+    def get_starting_points(self):
+        return {
+            "NIST Start 1": np.array([1.0, 5.0]),
+            "NIST Start 2": np.array([0.7, 4.0])
+        }
+
+
+class MGH17Problem(Problem):
+    """
+    Source: NIST
+    Level of Difficulty: Average
+    Model Classification: Exponential
+    Number of Parameters: 5
+    Number of Observations: 33
+    """
+    def __init__(self):
+        super().__init__(name="MGH17", n=5, m=33)
+
+        self.x_data = np.array([
+            0,10,20,30,40,50,60,70,80,90,
+            100,110,120,130,140,150,160,170,180,190,
+            200,210,220,230,240,250,260,270,280,290,
+            300,310,320
+        ], dtype=float)
+
+        self.y_data = np.array([
+            0.844,0.908,0.932,0.936,0.925,0.908,0.881,0.850,0.818,0.784,
+            0.751,0.718,0.685,0.658,0.628,0.603,0.580,0.558,0.538,0.522,
+            0.506,0.490,0.478,0.467,0.457,0.448,0.438,0.431,0.424,0.420,
+            0.414,0.411,0.406
+        ])
+
+    def model(self, b, x):
+        return (
+            b[0]
+            + b[1] * np.exp(-x * b[3])
+            + b[2] * np.exp(-x * b[4])
+        )
+
+    def F(self, b):
+        return self.model(b, self.x_data) - self.y_data
+
+    def J(self, b):
+        x = self.x_data
+        J = np.zeros((self.m, self.n))
+
+        exp4 = np.exp(-x * b[3])
+        exp5 = np.exp(-x * b[4])
+
+        J[:, 0] = 1.0
+        J[:, 1] = exp4
+        J[:, 2] = exp5
+
+        J[:, 3] = -b[1] * x * exp4
+        J[:, 4] = -b[2] * x * exp5
+
+        return J
+
+    def get_starting_points(self):
+        return {
+            "NIST Start 1": np.array([50.0, 150.0, -100.0, 1.0, 2.0]),
+            "NIST Start 2": np.array([0.5, 1.5, -1.0, 0.01, 0.02])
+        }
 
 
 class ThurberProblem(Problem):
+    """
+    Source: NIST
+    Level of Difficulty: Higher
+    Model Classification: Rational
+    Number of Parameters: 7
+    Number of Observations: 37
+    """
     def __init__(self):
         super().__init__(name="Thurber", n=7, m=37)
         self.x_data = np.array([

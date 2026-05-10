@@ -1,26 +1,29 @@
 import numpy as np
+from scipy.optimize import OptimizeResult
+
 from .subproblem import bisection_solver
 from .newton_with_secular_equation import NewtonSecularEquationSolver
 
-def modified_gauss_newton(problem, x0, M0=1e-3, L0=1e-6, max_iter=100, tol=1e-6, M_search=2, 
+def modified_gauss_newton(problem, x0, M0=1e-3, L0=1e-6, max_iter=100, tol=1e-6, 
                           return_history=False, subproblem_method = "secular"):
-    
-    if M_search not in [1, 2]:
-        raise ValueError("M_search must be either 1 (M only grows) or 2 (M grows and shrinks).")
     
     # Initialization
     x=x0
     M=M0
     L=L0
 
-    history = []
+    rss_history = []
+    x_history = []
+
+    success = False
 
     for k in range(max_iter):
         F_k = problem.F(x)
         J_k = problem.J(x)
 
         rss = (F_k**2).sum()
-        history.append(rss)
+        rss_history.append(rss)
+        x_history.append(x.copy())
 
         # M search
         while True:
@@ -41,19 +44,28 @@ def modified_gauss_newton(problem, x0, M0=1e-3, L0=1e-6, max_iter=100, tol=1e-6,
                 M *= 2
 
         x = candidate_point
-        if M_search == 1:
-            M = M
-        elif M_search == 2:
-            M = max(M * 0.5, L0)
 
-        if np.linalg.norm(J_k.T @ F_k) < tol and np.linalg.norm(h) < tol:
-            print(f"Modified Gauss-Newton Converged in {k+1} iterations.")
+        M = max(M * 0.5, L0)
+
+        if np.linalg.norm(h) < tol: # np.linalg.norm(J_k.T @ F_k) < tol
+            success = True
             break  
+    
+    F_final = problem.F(x)
+    final_rss = np.sum(F_final**2)
 
+    return OptimizeResult(
+        x=x,
+        x_history=x_history,
+        fun=F_final,
 
-    if return_history:
-            return x, history
-    return x 
+        success=success,
+
+        nit=k+1,
+
+        rss=final_rss,
+        rss_history=rss_history
+    )
 
 
 

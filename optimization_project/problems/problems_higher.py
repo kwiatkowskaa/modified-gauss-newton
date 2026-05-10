@@ -144,3 +144,64 @@ class Eckerle4Problem(Problem):
             "NIST Start 1": np.array([1.0, 10.0, 500.0]),
             "NIST Start 2": np.array([1.5, 5.0, 450.0])
         }
+    
+
+class BoxBODProblem(Problem):
+    """
+    Source: NIST/ITL StRD
+    Level of Difficulty: Higher
+    Model Classification: Exponential
+    Number of Parameters: 2
+    Number of Observations: 6
+    """
+    def __init__(self):
+        super().__init__(
+            name="BoxBOD", n=2, m=6, difficulty="Higher",
+            classification_model="Exponential", source="NIST/ITL StRD",
+            certified_solution=np.array([
+                2.1380940889E+02,
+                5.4723748542E-01
+            ]),
+            certified_rss=1.1680088766E+03
+        )
+
+        self.x_data = np.array([
+            1,
+            2,
+            3,
+            5,
+            7,
+            10
+        ], dtype=float)
+
+        self.y_data = np.array([
+            109,
+            149,
+            149,
+            191,
+            213,
+            224
+        ], dtype=float)
+
+    def model(self, b, x):
+        return b[0] * (1 - np.exp(-b[1] * x))
+
+    def F(self, b):
+        return self.model(b, self.x_data) - self.y_data
+
+    def J(self, b):
+        x = self.x_data
+        J = np.zeros((self.m, self.n))
+
+        exp_term = np.exp(-b[1] * x)
+
+        J[:, 0] = (1 - exp_term)
+        J[:, 1] = b[0] * (x * exp_term)
+
+        return J
+
+    def get_starting_points(self):
+        return {
+            "NIST Start 1": np.array([1.0, 1.0]),
+            "NIST Start 2": np.array([100.0, 0.75])
+        }

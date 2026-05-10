@@ -1,8 +1,9 @@
 import numpy as np
-from .subproblem import solve_subproblem
+from .subproblem import bisection_solver
+from .newton_with_secular_equation import NewtonSecularEquationSolver
 
 def modified_gauss_newton(problem, x0, M0=1e-3, L0=1e-6, max_iter=100, tol=1e-6, M_search=2, 
-                          return_history=False):
+                          return_history=False, subproblem_method = "secular"):
     
     if M_search not in [1, 2]:
         raise ValueError("M_search must be either 1 (M only grows) or 2 (M grows and shrinks).")
@@ -23,7 +24,12 @@ def modified_gauss_newton(problem, x0, M0=1e-3, L0=1e-6, max_iter=100, tol=1e-6,
 
         # M search
         while True:
-            h = solve_subproblem(Fx=F_k, Jx=J_k, M=M)
+            if subproblem_method == "bisection":
+                h = bisection_solver(Fx=F_k, Jx=J_k, M=M)
+            elif subproblem_method == "secular":
+                solver = NewtonSecularEquationSolver(g=F_k, J=J_k, M=M, delta=1)
+                h = solver.solve()
+
             candidate_point = x + h   # V_M_k <- # V_M(x_k)
             
             f_candidate_real = np.linalg.norm(problem.F(candidate_point))   # f(V_M_k(x_k))

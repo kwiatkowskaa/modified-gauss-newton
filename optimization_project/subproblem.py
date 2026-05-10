@@ -1,6 +1,6 @@
 import numpy as np
 
-def solve_subproblem(Fx, Jx, M, tol=1e-8):
+def bisection_solver(Fx, Jx, M, tol=1e-8):
     
     m = Fx.shape[0]
     n = Jx.shape[1]

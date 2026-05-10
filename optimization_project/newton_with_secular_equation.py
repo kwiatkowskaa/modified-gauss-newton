@@ -87,21 +87,98 @@ class NewtonSecularEquationSolver:
             return None, None, None, False
 
 
-    # def solve(self):
-    #     lam_L, lam_U, lam = self._get_initial_bounds()
+    def _find_optimal_lambda(self, max_iter = 15, uncertainty_method = "theta_1"):
+        """ Follows the Algorithm 7.3.4. """
+        self.lam_L, self.lam_U, lam = self._get_initial_bounds()
 
-    #     n = self.H.shape[0]
-    #     identity = np.eye(n)
+        n = self.H.shape[0]
+        identity = np.eye(n)
+        
+        # check for interior convergence ?
 
-    #     # STEP 1: check for INTERIOR SOLUTION - page 174
-    #     s, s_norm, w_norm, is_pos_def = self._perform_step(self.H)
+        for i in range(max_iter):
+            # --- Step 1. Attempt to factorize H(lambda) = LL^T ---
+            H_lam = self.H + lam * identity
+            s, s_norm, w_norm, is_pos_def = self._perform_step(H_lam)
 
-    #     if is_pos_def and s_norm < self.delta:
-    #         # case lam is in G region
-    #         return 0.0, s
+            in_F = is_pos_def
+            in_G = False
+            in_L = False
+            in_N = not is_pos_def
 
+            # set lam region L or G
+            if in_F:
+                if s_norm < self.delta:
+                    in_G = True     # λ ∈ G
+                else:
+                    in_L = True     # λ ∈ L
 
+            # --- Step 2. Update Bounds ---
+            if in_G:
+                self.lam_U = lam
+            else:
+                self.lam_L = lam
 
+            # --- Step 3. If lambda is in F ---
+            if in_F:
+                # step 3a.
+                lam_plus = lam + ((s_norm - self.delta)/self.delta) * (s_norm**2 / w_norm**2)
+                
+                # step 3b.
+                if in_G:
+                    # (i)
+                    eigvals, eigvecs = np.linalg.eigh(H_lam)
+                    u = eigvecs[:, 0]
+                    h_u_val = u.T @ H_lam @ u
+
+                    # (ii)
+                    self.lam_L = max(self.lam_L, lam - h_u_val)
+
+                    # (iii)
+                    pass
+
+                else:
+                    # step 3c.
+                    pass
+                    # step 3d.
+                    pass
+
+            # --- Step 4. Check for termination ---
+            pass
+
+            # --- Step 5. Update lambda for the next iteration ---
+            if in_L and np.linalg.norm(self.g) != 0:
+                lam = lam_plus
+            elif in_G:
+                _, _, _, is_plus_pos_def = self._perform_step(self.H + lam_plus * identity)
+                if is_plus_pos_def:
+                    # step 5a
+                    lam = lam_plus
+                else:
+                    # step 5b
+                    self.lam_L = max(self.lam_L, lam_plus)
+                    
+                    # check lambda_L for interior concergence
+                    pass
+                    
+                    lam = self._find_lambda_uncertainty(uncertainty_method, self.lam_L, self.lam_U)
+            else:
+                # lam is in N
+                lam = self._find_lambda_uncertainty("theta_1", self.lam_L, self.lam_U)
+        
+        return lam
+        
+    def solve(self):
+        lam_star = self._find_optimal_lambda()
+        m = self.H.shape[0] 
+        identity_m = np.eye(m)
+
+        mat = lam_star * identity_m + self.H
+        v = np.linalg.solve(mat, self.g)
+
+        h_star = -(1.0 / self.M) * self.J.T @ v
+
+        return h_star
 
 
 

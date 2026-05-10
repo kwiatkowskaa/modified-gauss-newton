@@ -1,2 +1,1 @@
 from .modified_gauss_newton import modified_gauss_newton
-from .gauss_newton_basic import gauss_newton_basic

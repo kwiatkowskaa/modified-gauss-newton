@@ -10,7 +10,15 @@ class DanWoodProblem(Problem):
     Number of Observations: 6
     """
     def __init__(self):
-        super().__init__(name="DanWood", n=2, m=6)
+        super().__init__(
+            name="DanWood", n=2, m=6, difficulty="Lower", 
+            classification_model="Miscellaneous", source="Observed",
+            certified_solution=np.array([
+                0.76886226176,
+                3.8604055871
+            ]),
+            certified_rss=4.3173084083E-03
+        )
 
         self.x_data = np.array([1.309, 1.471, 1.490, 1.565, 1.611, 1.680])
         self.y_data = np.array([2.138, 3.421, 3.597, 4.340, 4.882, 5.660])
@@ -45,7 +53,16 @@ class Chwirut1Problem(Problem):
     Number of Observations: 214
     """
     def __init__(self):
-        super().__init__(name="Chwirut1", n=3, m=214)
+        super().__init__(
+            name="Chwirut1", n=3, m=214, difficulty="Lower", 
+            classification_model="Exponential", source="Observed",
+            certified_solution=np.array([
+                1.9027818370E-01,
+                6.1314004477E-03,
+                1.0530908399E-02
+            ]),
+            certified_rss=2.3844771393E+03
+        )
 
         data = np.array([
             [92.9, 0.5], [78.7, 0.625], [64.2, 0.75], [64.9, 0.875], [57.1, 1.0], [43.3, 1.25], 

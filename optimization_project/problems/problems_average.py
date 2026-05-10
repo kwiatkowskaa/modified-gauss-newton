@@ -10,7 +10,18 @@ class MGH17Problem(Problem):
     Number of Observations: 33
     """
     def __init__(self):
-        super().__init__(name="MGH17", n=5, m=33)
+        super().__init__(
+            name="MGH17", n=5, m=33, difficulty="Average", 
+            classification_model="Exponential", source="Generated",
+            certified_solution=np.array([
+                3.7541005211E-01,
+                1.9358469127E+00,
+                -1.4646871366E+00,
+                1.2867534640E-02,
+                2.2122699662E-02,
+            ]),
+            certified_rss=5.4648946975E-05
+        )
 
         self.x_data = np.array([
             0,10,20,30,40,50,60,70,80,90,
@@ -68,7 +79,16 @@ class Roszman1Problem(Problem):
     Number of Observations: 25
     """
     def __init__(self):
-        super().__init__(name="Roszman1", n=4, m=25)
+        super().__init__(name="Roszman1", n=4, m=25, difficulty="Average", 
+            classification_model="Miscellaneous", source="Observed",
+            certified_solution=np.array([
+                2.0196866396E-01,		
+                -6.1953516256E-06,
+                1.2044556708E+03,
+                -1.8134269537E+02
+            ]),
+            certified_rss=4.9484847331E-04
+        )
 
         self.x_data = np.array([
             -4868.68, -4868.09, -4867.41,

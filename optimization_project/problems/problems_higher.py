@@ -10,7 +10,20 @@ class ThurberProblem(Problem):
     Number of Observations: 37
     """
     def __init__(self):
-        super().__init__(name="Thurber", n=7, m=37)
+        super().__init__(name="Thurber", n=7, m=37,  difficulty="Higher", 
+            classification_model="Rational", source="Observed",
+            certified_solution=np.array([
+                1.2881396800E+03,	
+                1.4910792535E+03,
+                5.8323836877E+02,
+                7.5416644291E+01,
+                9.6629502864E-01,
+                3.9797285797E-01,
+                4.9727297349E-02		
+            ]),
+            certified_rss=5.6427082397E+03
+        )
+        
         self.x_data = np.array([
             -3.067, -2.981, -2.921, -2.912, -2.840, -2.797, -2.702, -2.699, 
             -2.633, -2.481, -2.363, -2.322, -1.501, -1.460, -1.274, -1.212, 
@@ -76,7 +89,15 @@ class Eckerle4Problem(Problem):
     Number of Observations: 35
     """
     def __init__(self):
-        super().__init__(name="Eckerle4", n=3, m=35)
+        super().__init__(name="Eckerle4", n=3, m=35,  difficulty="Higher", 
+            classification_model="Exponential", source="Observed",
+            certified_solution=np.array([
+                1.5543827178E+00,
+                4.0888321754E+00,
+                4.5154121844E+02
+            ]),
+            certified_rss=1.4635887487E-03
+        )
 
         self.x_data = np.array([
             400.0,405.0,410.0,415.0,420.0,425.0,430.0,435.0,

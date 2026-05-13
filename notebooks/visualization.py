@@ -3,11 +3,14 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from experiments import run_lm_with_history
+from optimization_project.modified_gauss_newton import modified_gauss_newton
+
 difficulty_order = ["Lower", "Average", "Higher"]
 
 method_palette = {
-    "ModifiedGN": "#d81159",
-    "LM-lm": "#1b9aaa"
+    "ModifiedGN": "#cf0c43",
+    "LM-lm": "#0f90f2"
 }
 
 
@@ -33,12 +36,10 @@ def plot_boxplot(df, x, y, xlabel, ylabel, order=None, palette=None):
 
     plt.xlabel(xlabel)
     plt.ylabel(f"{ylabel} (log scale)")
-    plt.title(f"{ylabel} vs {xlabel} and optimization method")
+    plt.title(f"{ylabel} vs {xlabel} and Optimization Method")
 
     plt.legend(title="Method")
-
     plt.grid(alpha=0.3, axis="y")
-
     plt.show()
 
 
@@ -46,7 +47,7 @@ def plot_boxplot(df, x, y, xlabel, ylabel, order=None, palette=None):
 def plot_optimizer_paths(
     problem_data,
     grid_size=200,
-    padding=0.2,
+    padding=0.2
 ):
     """
     Visualizes optimization trajectories of LM and Modified Gauss–Newton methods
@@ -122,7 +123,8 @@ def plot_optimizer_paths(
             yy,
             np.log10(Z + 1e-16),
             levels=50,
-            cmap="Greys_r"
+            cmap="viridis",
+            alpha=0.4
         )
 
         # ----------------------------------------
@@ -139,6 +141,7 @@ def plot_optimizer_paths(
             linewidth=2,
             label='LM',
             color=method_palette["LM-lm"],
+            zorder=2
         )
 
         # ----------------------------------------
@@ -155,6 +158,7 @@ def plot_optimizer_paths(
             linewidth=2,
             label='Modified GN',
             color=method_palette["ModifiedGN"],
+            zorder=2
         )
 
         # ----------------------------------------
@@ -168,7 +172,8 @@ def plot_optimizer_paths(
             s=100,
             linewidths=3,
             label='Start',
-            color="black"
+            color="black",
+            zorder=10
         )
 
         if problem.certified_solution is not None:
@@ -179,9 +184,11 @@ def plot_optimizer_paths(
                 x_star[0],
                 x_star[1],
                 marker='*',
-                s=260,
-                label='Certified',
-                color='#d81159'
+                s=280,
+                label='Certified Solution',
+                color='red',
+                zorder=10,
+                edgecolors='black'
             )
 
         ax.set_title(start_name)

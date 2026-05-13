@@ -25,16 +25,26 @@ def compute_metrics(problem, x_final, rss_final):
         )
 
         metrics["parameter_error"] = param_error
+        metrics["relative_parameter_error"] = rel_param_error
 
     else:
         metrics["parameter_error"] = np.nan
+        metrics["relative_parameter_error"] = np.nan
 
     if problem.certified_rss is not None:
         metrics["rss_error"] = abs(
             rss_final - problem.certified_rss
         )
+        metrics["relative_rss_error"] = (
+            abs(rss_final - problem.certified_rss)
+            / abs(problem.certified_rss)
+        )
     else:
         metrics["rss_error"] = np.nan
+        metrics["relative_rss_error"] = np.nan
+        
+    grad_norm = np.linalg.norm(problem.J(x_final).T @ problem.F(x_final))
+    metrics["gradient_norm"] = grad_norm
 
     return metrics
 
@@ -105,7 +115,10 @@ def run_lm(
         "final_rss": rss_final,
 
         "parameter_error": metrics["parameter_error"],
-        "rss_error": metrics["rss_error"]
+        "relative_parameter_error": metrics["relative_parameter_error"],
+        "rss_error": metrics["rss_error"],
+        "relative_rss_error": metrics["relative_rss_error"],
+        "gradient_norm": metrics["gradient_norm"]
     }
 
     return row
@@ -157,7 +170,10 @@ def run_modified_gn(
         "final_rss": rss_final,
 
         "parameter_error": metrics["parameter_error"],
-        "rss_error": metrics["rss_error"]
+        "relative_parameter_error": metrics["relative_parameter_error"],
+        "rss_error": metrics["rss_error"],
+        "relative_rss_error": metrics["relative_rss_error"],
+        "gradient_norm": metrics["gradient_norm"]
     }
 
     return row
@@ -206,7 +222,11 @@ def run_lm_with_history(problem, x0):
         fun=wrapped_F,
         jac=problem.J,
         x0=x0,
-        method="lm"
+        method="lm",
+        ftol=1e-6,
+        xtol=1e-6,
+        gtol=1e-6,
+        max_nfev=100
     )
 
     result.x_history = x_history
@@ -218,7 +238,7 @@ def generate_trajectory_data(
     problems,
     M0=1e-3,
     L0=1e-6,
-    tol=1e-8,
+    tol=1e-6,
     max_iter=100,
 ):
     """

@@ -5,7 +5,7 @@ from .subproblem import bisection_solver
 from .newton_with_secular_equation import NewtonSecularEquationSolver
 
 def modified_gauss_newton(problem, x0, M0=1e-3, L0=1e-6, max_iter=100, tol=1e-6, 
-                          return_history=False, subproblem_method = "secular"):
+                          subproblem_method = "secular"):
     
     # Initialization
     x=x0

@@ -64,6 +64,7 @@ class NewtonSecularEquationSolver:
         
         raise ValueError(f"Unknown method: {method}")
     
+
     def _perform_step(self, H_lam):
         """ Algorithm 7.3.1 """
         # case: lam > - lam_1
@@ -93,13 +94,16 @@ class NewtonSecularEquationSolver:
 
         n = self.H.shape[0]
         identity = np.eye(n)
-        
-        # check for interior convergence ?
+
 
         for i in range(max_iter):
             # --- Step 1. Attempt to factorize H(lambda) = LL^T ---
             H_lam = self.H + lam * identity
             s, s_norm, w_norm, is_pos_def = self._perform_step(H_lam)
+
+            # check for interior convergence - 7.3.6
+            if lam==0 and is_pos_def and s_norm < self.delta:
+                return 0.0
 
             in_F = is_pos_def
             in_G = False
@@ -135,16 +139,65 @@ class NewtonSecularEquationSolver:
                     self.lam_L = max(self.lam_L, lam - h_u_val)
 
                     # (iii)
-                    pass
+                    # quadratic equation
+                    sTu = np.dot(s, u)
+                    square_term = np.sqrt(max(0, sTu**2 + self.delta**2 - s_norm**2))
+                    
+                    # two candidates for alpha
+                    alpha_candidates = [-sTu + square_term, -sTu - square_term]
 
-                else:
-                    # step 3c.
-                    pass
-                    # step 3d.
-                    pass
+                    s1 = s + alpha_candidates[0] * u
+                    s2 = s + alpha_candidates[1] * u
+                    
+                    q1 = self.g @ s1 + 0.5 * s1 @ self.H @ s1
+                    q2 = self.g @ s2 + 0.5 * s2 @ self.H @ s2
+
+                    # select alpha that minimizes model func
+                    if q1 < q2:
+                        alpha = alpha_candidates[0]
+                        s = s1
+                    else:
+                        alpha = alpha_candidates[1]
+                        s = s2
+
+            # If lambda is NOT in F
+            else:
+                # step 3c.
+                # Cholesky factorization will encounter a nonpositive pivot at the kth stage of the decomposition
+                success, L, k, d_kk = self._partial_cholesky(H_lam)
+                delta = -d_kk
+
+                # find vector v such that (H + delta*e_k e_k^T) v = 0
+                n = L.shape[0]
+                v = np.zeros(n)
+
+                v[k] = 1.0
+
+                for j in range(k - 1, -1, -1):
+                    s = np.dot(L[j + 1:k + 1, j], v[j + 1:k + 1])
+                    v[j] = -s / L[j, j]    
+
+                # step 3d.
+                lambda_B = lam + delta / (np.linalg.norm(v) ** 2)
+                self.lam_L = max(self.lam_L, lambda_B)
+
 
             # --- Step 4. Check for termination ---
-            pass
+            """ Algorithm 7.3.5 """
+            k_easy = 0.1
+            k_hard = 0.2
+
+            # EASY CASE
+            if in_F and abs(s_norm - self.delta) <= k_easy * self.delta:
+                break
+
+            if in_G and lam == 0:
+                break
+                
+            # HARD CASE
+            if in_G and alpha**2 * (u.T @ H_lam @ u) <= k_hard * (s.T @ H_lam @ s + lam * self.delta**2):
+                break
+
 
             # --- Step 5. Update lambda for the next iteration ---
             if in_L and np.linalg.norm(self.g) != 0:
@@ -168,6 +221,7 @@ class NewtonSecularEquationSolver:
         
         return lam
         
+
     def solve(self):
         lam_star = self._find_optimal_lambda()
         m = self.H.shape[0] 
@@ -179,6 +233,34 @@ class NewtonSecularEquationSolver:
         h_star = -(1.0 / self.M) * self.J.T @ v
 
         return h_star
+
+
+
+    def _partial_cholesky(self, A):
+        """
+        Partial Cholesky factorization.
+        """
+
+        n = A.shape[0]
+        L = np.zeros_like(A)
+
+        for k in range(n):
+
+            s = np.sum(L[k, :k] ** 2)
+            d_kk = A[k, k] - s
+
+            # FAILURE
+            if d_kk <= 0:
+                return False, L, k, d_kk
+
+            L[k, k] = np.sqrt(d_kk)
+
+            for i in range(k + 1, n):
+
+                s2 = np.sum(L[i, :k] * L[k, :k])
+                L[i, k] = (A[i, k] - s2) / L[k, k]
+
+        return True, L, None, None
 
 
 

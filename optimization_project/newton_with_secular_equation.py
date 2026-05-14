@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.linalg import cholesky, solve_triangular
+from scipy.linalg import cholesky, solve_triangular, LinAlgError
 
 class NewtonSecularEquationSolver:
     """
@@ -83,7 +83,7 @@ class NewtonSecularEquationSolver:
 
             return s, s_norm, w_norm, True
         
-        except np.linalg.LinAlgError:
+        except LinAlgError:
             # we are in zone N of lambdas <--> cholesky functiorization is impossible
             return None, None, None, False
 
@@ -95,10 +95,11 @@ class NewtonSecularEquationSolver:
         n = self.H.shape[0]
         identity = np.eye(n)
 
-
         for i in range(max_iter):
             # --- Step 1. Attempt to factorize H(lambda) = LL^T ---
             H_lam = self.H + lam * identity
+            H_lam = 0.5 * (H_lam + H_lam.T) # ensure symmetry
+            
             s, s_norm, w_norm, is_pos_def = self._perform_step(H_lam)
 
             # check for interior convergence - 7.3.6
@@ -250,7 +251,7 @@ class NewtonSecularEquationSolver:
             d_kk = A[k, k] - s
 
             # FAILURE
-            if d_kk <= 0:
+            if d_kk <= 1e-16: # floating-point issue
                 return False, L, k, d_kk
 
             L[k, k] = np.sqrt(d_kk)

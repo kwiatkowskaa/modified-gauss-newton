@@ -44,6 +44,7 @@ class DanWoodProblem(Problem):
             "NIST Start 2": np.array([0.7, 4.0])
         }
     
+
 class Chwirut1Problem(Problem):
     """
     Source: NIST
@@ -110,8 +111,8 @@ class Chwirut1Problem(Problem):
             [10.05, 3.75], [28.9, 1.75], [28.95, 1.75]
         ])
 
-        self.x_data = data[:,0]
-        self.y_data = data[:,1]
+        self.y_data = data[:,0]
+        self.x_data = data[:,1]
 
     def model(self, b, x):
         """y = exp[-b1*x] / (b2 + b3*x)"""
@@ -137,4 +138,175 @@ class Chwirut1Problem(Problem):
         return {
             "NIST Start 1": np.array([0.1, 0.01, 0.02]),
             "NIST Start 2": np.array([0.15, 0.008, 0.010])
+        }
+
+
+class Misra1aProblem(Problem):
+    """
+    Source: NIST
+    Level of Difficulty: Lower
+    Model Classification: Exponential
+    Number of Parameters: 2
+    Number of Observations: 14
+    """
+
+    def __init__(self):
+        super().__init__(
+            name="Misra1a",
+            n=2,
+            m=14,
+            difficulty="Lower",
+            classification_model="Exponential",
+            source="Observed",
+            certified_solution=np.array([
+                2.3894212918E+02,
+                5.5015643181E-04
+            ]),
+            certified_rss=1.2455138894E-01
+        )
+
+        data = np.array([
+            [10.07, 77.6],
+            [14.73, 114.9],
+            [17.94, 141.1],
+            [23.93, 190.8],
+            [29.61, 239.9],
+            [35.18, 289.0],
+            [40.02, 332.8],
+            [44.82, 378.4],
+            [50.76, 434.8],
+            [55.05, 477.3],
+            [61.01, 536.8],
+            [66.40, 593.1],
+            [75.47, 689.1],
+            [81.78, 760.0]
+        ])
+
+        self.y_data = data[:, 0]
+        self.x_data = data[:, 1]
+
+    def model(self, b, x):
+        """y = b1*(1-exp[-b2*x])"""
+        return b[0] * (1.0 - np.exp(-b[1] * x))
+
+    def F(self, b):
+        return self.model(b, self.x_data) - self.y_data
+
+    def J(self, b):
+        x = self.x_data
+
+        J = np.zeros((self.m, self.n))
+
+        exp_term = np.exp(-b[1] * x)
+
+        J[:, 0] = 1.0 - exp_term
+        J[:, 1] = b[0] * x * exp_term
+
+        return J
+
+    def get_starting_points(self):
+        return {
+            "NIST Start 1": np.array([500.0, 0.0001]),
+            "NIST Start 2": np.array([250.0, 0.0005])
+        }
+    
+
+class Lanczos3Problem(Problem):
+    """
+    Source: NIST
+    Level of Difficulty: Lower
+    Model Classification: Exponential
+    Number of Parameters: 6
+    Number of Observations: 24
+    """
+
+    def __init__(self):
+        super().__init__(
+            name="Lanczos3",
+            n=6,
+            m=24,
+            difficulty="Lower",
+            classification_model="Exponential",
+            source="Generated",
+            certified_solution=np.array([
+                8.6816414977E-02,
+                9.5498101505E-01,
+                8.4400777463E-01,
+                2.9515951832E+00,
+                1.5825685901E+00,
+                4.9863565084E+00
+            ]),
+            certified_rss=1.6117193594E-08
+        )
+
+        data = np.array([
+            [2.5134, 0.00],
+            [2.0443, 0.05],
+            [1.6684, 0.10],
+            [1.3664, 0.15],
+            [1.1232, 0.20],
+            [0.9269, 0.25],
+            [0.7679, 0.30],
+            [0.6389, 0.35],
+            [0.5338, 0.40],
+            [0.4479, 0.45],
+            [0.3776, 0.50],
+            [0.3197, 0.55],
+            [0.2720, 0.60],
+            [0.2325, 0.65],
+            [0.1997, 0.70],
+            [0.1723, 0.75],
+            [0.1493, 0.80],
+            [0.1301, 0.85],
+            [0.1138, 0.90],
+            [0.1000, 0.95],
+            [0.0883, 1.00],
+            [0.0783, 1.05],
+            [0.0698, 1.10],
+            [0.0624, 1.15]
+        ])
+
+        self.y_data = data[:, 0]
+        self.x_data = data[:, 1]
+
+    def model(self, b, x):
+        """
+        y = b1*exp(-b2*x)
+          + b3*exp(-b4*x)
+          + b5*exp(-b6*x)
+        """
+
+        return (
+            b[0] * np.exp(-b[1] * x)
+            + b[2] * np.exp(-b[3] * x)
+            + b[4] * np.exp(-b[5] * x)
+        )
+
+    def F(self, b):
+        return self.model(b, self.x_data) - self.y_data
+
+    def J(self, b):
+        x = self.x_data
+
+        J = np.zeros((self.m, self.n))
+
+        exp1 = np.exp(-b[1] * x)
+        exp2 = np.exp(-b[3] * x)
+        exp3 = np.exp(-b[5] * x)
+
+        J[:, 0] = exp1
+        J[:, 1] = -b[0] * x * exp1
+
+        J[:, 2] = exp2
+        J[:, 3] = -b[2] * x * exp2
+
+        J[:, 4] = exp3
+        J[:, 5] = -b[4] * x * exp3
+
+        return J
+
+    def get_starting_points(self):
+        return {
+            "NIST Start 1": np.array([1.2, 0.3, 5.6, 5.5, 6.5, 7.6]),
+            "NIST Start 2": np.array([0.5, 0.7, 3.6, 4.2, 4.0, 6.3])
         }

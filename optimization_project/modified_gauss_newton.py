@@ -47,9 +47,13 @@ def modified_gauss_newton(problem, x0, M0=1e-3, L0=1e-6, max_iter=100, tol=1e-6,
 
         M = max(M * 0.5, L0)
 
-        if np.linalg.norm(h) < tol: # np.linalg.norm(J_k.T @ F_k) < tol
+        if np.linalg.norm(h) < tol: # step convergence
             success = True
-            break  
+            break
+
+        if np.linalg.norm(F_k) < tol: # function convergence
+            success = True
+            break
     
     F_final = problem.F(x)
     final_rss = np.sum(F_final**2)

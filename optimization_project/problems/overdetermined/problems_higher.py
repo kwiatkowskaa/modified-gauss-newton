@@ -1,4 +1,4 @@
-from .problem import Problem
+from ..problem import Problem
 import numpy as np
 
 class ThurberProblem(Problem):

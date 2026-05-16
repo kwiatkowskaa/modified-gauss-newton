@@ -78,7 +78,11 @@ def run_lm(
     and returns benchmark statistics for a single starting point.
     """
     # LM requires m >= n
-    method = "lm" if problem.m >= problem.n else "trf"
+    if problem.m >= problem.n:
+        method = "lm"
+    else:
+        print("Method 'lm' doesn't work when the number of residuals is less than the number of variables. Use 'trf' instead.\n")
+        method = "trf"
 
     result = least_squares(
         fun=problem.F,
@@ -188,15 +192,13 @@ def benchmark_methods(problems):
     rows = []
 
     for problem in problems:
-        print(f"Running problem: {problem.name}")
+        print(f" ---- Running problem: {problem.name}")
 
         starts = problem.get_starting_points()
 
         for start_name, x0 in starts.items():
-
             row_mgn = run_modified_gn(problem, x0, start_name)
             rows.append(row_mgn)
-
 
             row_lm = run_lm(problem, x0, start_name)
             rows.append(row_lm)

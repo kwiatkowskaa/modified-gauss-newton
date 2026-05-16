@@ -166,6 +166,11 @@ class NewtonSecularEquationSolver:
                 # step 3c.
                 # Cholesky factorization will encounter a nonpositive pivot at the kth stage of the decomposition
                 success, L, k, d_kk = self._partial_cholesky(H_lam)
+                
+                if d_kk is None:
+                    lam = self._find_lambda_uncertainty("theta_1", self.lam_L, self.lam_U)
+                    continue
+                    
                 delta = -d_kk
 
                 # find vector v such that (H + delta*e_k e_k^T) v = 0

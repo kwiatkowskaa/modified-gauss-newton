@@ -141,6 +141,7 @@ class NewtonSecularEquationSolver:
 
                     # (iii)
                     # quadratic equation
+                    s_orig = s.copy()
                     sTu = np.dot(s, u)
                     square_term = np.sqrt(max(0, sTu**2 + self.delta**2 - s_norm**2))
                     
@@ -180,8 +181,8 @@ class NewtonSecularEquationSolver:
                 v[k] = 1.0
 
                 for j in range(k - 1, -1, -1):
-                    s = np.dot(L[j + 1:k + 1, j], v[j + 1:k + 1])
-                    v[j] = -s / L[j, j]    
+                    tmp = np.dot(L[j + 1:k + 1, j], v[j + 1:k + 1])
+                    v[j] = -tmp / L[j, j]    
 
                 # step 3d.
                 lambda_B = lam + delta / (np.linalg.norm(v) ** 2)
@@ -201,7 +202,7 @@ class NewtonSecularEquationSolver:
                 break
                 
             # HARD CASE
-            if in_G and alpha**2 * (u.T @ H_lam @ u) <= k_hard * (s.T @ H_lam @ s + lam * self.delta**2):
+            if in_G and alpha**2 * (u.T @ H_lam @ u) <= k_hard * (s_orig.T @ H_lam @ s_orig + lam * self.delta**2):
                 break
 
 

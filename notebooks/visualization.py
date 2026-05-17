@@ -1,8 +1,7 @@
 import numpy as np
-
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+from scipy.optimize import least_squares
 from experiments import run_lm_with_history
 from optimization_project.modified_gauss_newton import modified_gauss_newton
 
@@ -138,10 +137,6 @@ def plot_boxplot_with_connections(df, x, y, xlabel, ylabel, order=None, palette=
     plt.tight_layout()
     plt.show()
 
-
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import least_squares
 
 def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=None):
     """

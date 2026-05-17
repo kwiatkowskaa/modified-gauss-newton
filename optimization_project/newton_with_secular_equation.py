@@ -167,10 +167,6 @@ class NewtonSecularEquationSolver:
                 # step 3c.
                 # Cholesky factorization will encounter a nonpositive pivot at the kth stage of the decomposition
                 success, L, k, d_kk = self._partial_cholesky(H_lam)
-                
-                if d_kk is None:
-                    lam = self._find_lambda_uncertainty("theta_1", self.lam_L, self.lam_U)
-                    continue
                     
                 delta = -d_kk
 
@@ -247,27 +243,30 @@ class NewtonSecularEquationSolver:
         """
         Partial Cholesky factorization.
         """
-
         n = A.shape[0]
         L = np.zeros_like(A)
 
-        for k in range(n):
+        min_d_kk = float('inf')
+        min_k = 0
 
+        for k in range(n):
             s = np.sum(L[k, :k] ** 2)
             d_kk = A[k, k] - s
 
-            # FAILURE
-            if d_kk <= 1e-16: # floating-point issue
-                return False, L, k, d_kk
+            if d_kk < min_d_kk:
+                min_d_kk = d_kk
+                min_k = k
 
+            if d_kk <= 1e-16:
+                return False, L, k, d_kk
+            
             L[k, k] = np.sqrt(d_kk)
 
             for i in range(k + 1, n):
-
                 s2 = np.sum(L[i, :k] * L[k, :k])
                 L[i, k] = (A[i, k] - s2) / L[k, k]
 
-        return True, L, None, None
+        return False, L, min_k, min_d_kk
 
 
 

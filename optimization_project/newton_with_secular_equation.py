@@ -103,7 +103,7 @@ class NewtonSecularEquationSolver:
             s, s_norm, w_norm, is_pos_def = self._perform_step(H_lam)
 
             # check for interior convergence - 7.3.6
-            if lam==0 and is_pos_def and s_norm < self.delta:
+            if np.isclose(lam, 0.0) and is_pos_def and s_norm < self.delta:
                 return 0.0
 
             in_F = is_pos_def
@@ -166,7 +166,7 @@ class NewtonSecularEquationSolver:
             else:
                 # step 3c.
                 # Cholesky factorization will encounter a nonpositive pivot at the kth stage of the decomposition
-                success, L, k, d_kk = self._partial_cholesky(H_lam)
+                L, k, d_kk = self._partial_cholesky(H_lam)
                     
                 delta = -d_kk
 
@@ -194,7 +194,7 @@ class NewtonSecularEquationSolver:
             if in_F and abs(s_norm - self.delta) <= k_easy * self.delta:
                 break
 
-            if in_G and lam == 0:
+            if in_G and np.isclose(lam, 0.0):
                 break
                 
             # HARD CASE
@@ -231,7 +231,11 @@ class NewtonSecularEquationSolver:
         identity_m = np.eye(m)
 
         mat = lam_star * identity_m + self.H
-        v = np.linalg.solve(mat, self.g)
+
+        try:
+            v = np.linalg.solve(mat, self.g)
+        except np.linalg.LinAlgError:
+            v = np.linalg.lstsq(mat, self.g, rcond=1e-16)[0]
 
         h_star = -(1.0 / self.M) * self.J.T @ v
 
@@ -258,7 +262,7 @@ class NewtonSecularEquationSolver:
                 min_k = k
 
             if d_kk <= 1e-16:
-                return False, L, k, d_kk
+                return L, k, d_kk
             
             L[k, k] = np.sqrt(d_kk)
 
@@ -266,7 +270,7 @@ class NewtonSecularEquationSolver:
                 s2 = np.sum(L[i, :k] * L[k, :k])
                 L[i, k] = (A[i, k] - s2) / L[k, k]
 
-        return False, L, min_k, min_d_kk
+        return L, min_k, min_d_kk
 
 
 

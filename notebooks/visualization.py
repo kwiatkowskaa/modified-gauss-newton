@@ -20,7 +20,7 @@ def plot_boxplot(df, x, y, xlabel, ylabel, order=None, palette=None):
     Uses logarithmic scaling on the y-axis to improve visibility of metric distributions.
     """
 
-    plt.figure(figsize=(10,4), dpi=300)
+    plt.figure(figsize=(9, 4))
 
     sns.boxplot(
         data=df,
@@ -49,7 +49,7 @@ def plot_boxplot_with_connections(df, x, y, xlabel, ylabel, order=None, palette=
     Overlays individual dataset points and connects paired results (same dataset run, 
     different methods) with lines to clearly visualize the performance shift.
     """
-    plt.figure(figsize=(8, 4), dpi=300)
+    plt.figure(figsize=(8, 4))
     ax = plt.gca()
 
     categories = order if order is not None else sorted(df[x].unique())
@@ -150,7 +150,7 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
     if method_palette is None:
         raise ValueError("Provide palette of colours.")
 
-    fig, axes = plt.subplots(5, 5, figsize=(15, 15), sharex=True, sharey=True)
+    fig, axes = plt.subplots(5, 5, figsize=(15, 12), sharex=True, sharey=True)
     
     print(f"Initializing enhanced 5x5 convergence matrix for {problem_cls.__name__}...")
     
@@ -171,7 +171,7 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
                 # Gray out cells that violate structural problem limits
                 ax.set_facecolor('#d9d9d9') 
                 ax.text(0.5, 0.5, f"Invalid\nGeometry\nn={n}\nm={m}", 
-                        color='#555555', fontsize=13, fontweight='bold',
+                        color='#555555',
                         ha='center', va='center', transform=ax.transAxes)
                 valid_geometry = False
                 
@@ -215,35 +215,33 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
                 if legend_handles is None:
                     legend_handles = [line_sec, line_sp]
                 
-                ax.text(0.95, 0.95, f"n:{n}\nm:{m}", fontsize=11, color='black', fontweight='bold',
+                ax.text(0.95, 0.95, f"n: {n}\nm: {m}", color='black',
                         ha='right', va='top', transform=ax.transAxes, 
                         bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none", alpha=0.75))
                 
                 ax.grid(True, which="both", ls="-", alpha=0.2)
             
-            ax.tick_params(axis='both', which='major', labelsize=14)
+            ax.tick_params(axis='both', which='major')
             
             if i == 4:
-                ax.set_xlabel("Iter", fontsize=16)
+                ax.set_xlabel("Iteration", fontsize=12)
             if j == 0:
-                ax.set_ylabel("RSS", fontsize=16)
+                ax.set_ylabel("RSS", fontsize=12)
 
     if legend_handles is not None:
         fig.legend(
             legend_handles, 
             ["Modified GN", "SciPy (LM/TRF)"],
             loc="upper center", 
-            bbox_to_anchor=(0.5, 0.94),
+            bbox_to_anchor=(0.5, 0.95),
             ncol=2, 
-            fontsize=20, 
-            frameon=True, 
-            shadow=True
+            fontsize=12,
+            frameon=True,
         )
     
-    fig.suptitle(f"Convergence Matrix (5x5) for {problem_cls.__name__}", 
-                 fontsize=24, fontweight='bold', y=0.98)
+    fig.suptitle(f"Convergence Matrix (5x5) for {problem_cls.__name__}", y=0.98, fontsize=18)
     
-    plt.tight_layout(rect=[0, 0, 1, 0.92]) 
+    plt.tight_layout(rect=[0, 0, 1, 0.94]) 
     plt.show()
 
 
@@ -273,12 +271,7 @@ def plot_optimizer_paths(
         lm_res = run["lm"]
         mgn_res = run["modified_gn"]
 
-        # ----------------------------------------
-        # collect all points
-        # ----------------------------------------
-
         all_points = np.vstack([
-
             np.array(lm_res.x_history),
             np.array(mgn_res.x_history),
             problem.certified_solution.reshape(1, -1)

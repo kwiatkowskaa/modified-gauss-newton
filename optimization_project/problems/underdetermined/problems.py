@@ -288,7 +288,7 @@ class DiscreteBoundaryValueProblem(Problem):
         }
     
 
-class Problem46Luksan(Problem):
+class Luksan46Problem(Problem):
     """
     Source: Transcendental Block System (Luksan et al. - Problem 46)
     Level of Difficulty: N/A
@@ -416,7 +416,7 @@ class TrigonometricExponentialProblem(Problem):
         }
     
 
-class Problem23Rosenbrock(Problem):
+class ExtendedRosenbrockProblem(Problem):
     """
     Source: Extended Rosenbrock function (Luksan et al. - Problem 23)
     Number of Parameters: n (User-defined)

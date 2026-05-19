@@ -1,0 +1,312 @@
+from ..problem import Problem
+import numpy as np
+
+class DanWoodProblem(Problem):
+    """
+    Source: NIST
+    Level of Difficulty: Lower
+    Model Classification: Miscellaneous
+    Number of Parameters: 2
+    Number of Observations: 6
+    """
+    def __init__(self):
+        super().__init__(
+            name="DanWood", n=2, m=6, difficulty="Lower", 
+            classification_model="Miscellaneous", source="Observed",
+            certified_solution=np.array([
+                0.76886226176,
+                3.8604055871
+            ]),
+            certified_rss=4.3173084083E-03
+        )
+
+        self.x_data = np.array([1.309, 1.471, 1.490, 1.565, 1.611, 1.680])
+        self.y_data = np.array([2.138, 3.421, 3.597, 4.340, 4.882, 5.660])
+
+    def model(self, b, x):
+        return b[0] * x**b[1]
+
+    def F(self, b):
+        return self.model(b, self.x_data) - self.y_data
+
+    def J(self, b):
+        x = self.x_data
+        J = np.zeros((self.m, self.n))
+
+        J[:,0] = x**b[1]
+        J[:,1] = b[0] * x**b[1] * np.log(x)
+
+        return J
+
+    def get_starting_points(self):
+        return {
+            "NIST Start 1": np.array([1.0, 5.0]),
+            "NIST Start 2": np.array([0.7, 4.0])
+        }
+    
+
+class Chwirut1Problem(Problem):
+    """
+    Source: NIST
+    Level of Difficulty: Lower
+    Model Classification: Exponential
+    Number of Parameters: 3
+    Number of Observations: 214
+    """
+    def __init__(self):
+        super().__init__(
+            name="Chwirut1", n=3, m=214, difficulty="Lower", 
+            classification_model="Exponential", source="Observed",
+            certified_solution=np.array([
+                1.9027818370E-01,
+                6.1314004477E-03,
+                1.0530908399E-02
+            ]),
+            certified_rss=2.3844771393E+03
+        )
+
+        data = np.array([
+            [92.9, 0.5], [78.7, 0.625], [64.2, 0.75], [64.9, 0.875], [57.1, 1.0], [43.3, 1.25], 
+            [31.1, 1.75], [23.6, 2.25], [31.05, 1.75], [23.775, 2.25], [17.7375, 2.75], 
+            [13.8, 3.25], [11.5875, 3.75], [9.4125, 4.25], [7.725, 4.75], [7.35, 5.25], 
+            [8.025, 5.75], [90.6, 0.5], [76.9, 0.625], [71.6, 0.75], [63.6, 0.875], 
+            [54.0, 1.0], [39.2, 1.25], [29.3, 1.75], [21.4, 2.25], [29.175, 1.75], 
+            [22.125, 2.25], [17.5125, 2.75], [14.25, 3.25], [9.45, 3.75], [9.15, 4.25], 
+            [7.9125, 4.75], [8.475, 5.25], [6.1125, 5.75], [80.0, 0.5], [79.0, 0.625], 
+            [63.8, 0.75], [57.2, 0.875], [53.2, 1.0], [42.5, 1.25], [26.8, 1.75], 
+            [20.4, 2.25], [26.85, 1.75], [21.0, 2.25], [16.4625, 2.75], [12.525, 3.25], 
+            [10.5375, 3.75], [8.5875, 4.25], [7.125, 4.75], [6.1125, 5.25], [5.9625, 5.75], 
+            [74.1, 0.5], [67.3, 0.625], [60.8, 0.75], [55.5, 0.875], [50.3, 1.0], 
+            [41.0, 1.25], [29.4, 1.75], [20.4, 2.25], [29.3625, 1.75], [21.15, 2.25], 
+            [16.7625, 2.75], [13.2, 3.25], [10.875, 3.75], [8.175, 4.25], [7.35, 4.75], 
+            [5.9625, 5.25], [5.625, 5.75], [81.5, 0.5], [62.4, 0.75], [32.5, 1.5], 
+            [12.41, 3.0], [13.12, 3.0], [15.56, 3.0], [5.63, 6.0], [78.0, 0.5], 
+            [59.9, 0.75], [33.2, 1.5], [13.84, 3.0], [12.75, 3.0], [14.62, 3.0], 
+            [3.94, 6.0], [76.8, 0.5], [61.0, 0.75], [32.9, 1.5], [13.87, 3.0], 
+            [11.81, 3.0], [13.31, 3.0], [5.44, 6.0], [78.0, 0.5], [63.5, 0.75], 
+            [33.8, 1.5], [12.56, 3.0], [5.63, 6.0], [12.75, 3.0], [13.12, 3.0], 
+            [5.44, 6.0], [76.8, 0.5], [60.0, 0.75], [47.8, 1.0], [32.0, 1.5], 
+            [22.2, 2.0], [22.57, 2.0], [18.82, 2.5], [13.95, 3.0], [11.25, 4.0], 
+            [9.0, 5.0], [6.67, 6.0], [75.8, 0.5], [62.0, 0.75], [48.8, 1.0], 
+            [35.2, 1.5], [20.0, 2.0], [20.32, 2.0], [19.31, 2.5], [12.75, 3.0], 
+            [10.42, 4.0], [7.31, 5.0], [7.42, 6.0], [70.5, 0.5], [59.5, 0.75], 
+            [48.5, 1.0], [35.8, 1.5], [21.0, 2.0], [21.67, 2.0], [21.0, 2.5], 
+            [15.64, 3.0], [8.17, 4.0], [8.55, 5.0], [10.12, 6.0], [78.0, 0.5], 
+            [66.0, 0.625], [62.0, 0.75], [58.0, 0.875], [47.7, 1.0], [37.8, 1.25], 
+            [20.2, 2.25], [21.07, 2.25], [13.87, 2.75], [9.67, 3.25], [7.76, 3.75], 
+            [5.44, 4.25], [4.87, 4.75], [4.01, 5.25], [3.75, 5.75], [24.19, 3.0], 
+            [25.76, 3.0], [18.07, 3.0], [11.81, 3.0], [12.07, 3.0], [16.12, 3.0], 
+            [70.8, 0.5], [54.7, 0.75], [48.0, 1.0], [39.8, 1.5], [29.8, 2.0], 
+            [23.7, 2.5], [29.62, 2.0], [23.81, 2.5], [17.7, 3.0], [11.55, 4.0], 
+            [12.07, 5.0], [8.74, 6.0], [80.7, 0.5], [61.3, 0.75], [47.5, 1.0], 
+            [29.0, 1.5], [24.0, 2.0], [17.7, 2.5], [24.56, 2.0], [18.67, 2.5], 
+            [16.24, 3.0], [8.74, 4.0], [7.87, 5.0], [8.51, 6.0], [66.7, 0.5], 
+            [59.2, 0.75], [40.8, 1.0], [30.7, 1.5], [25.7, 2.0], [16.3, 2.5], 
+            [25.99, 2.0], [16.95, 2.5], [13.35, 3.0], [8.62, 4.0], [7.2, 5.0], 
+            [6.64, 6.0], [13.69, 3.0], [81.0, 0.5], [64.5, 0.75], [35.5, 1.5], 
+            [13.31, 3.0], [4.87, 6.0], [12.94, 3.0], [5.06, 6.0], [15.19, 3.0], 
+            [14.62, 3.0], [15.64, 3.0], [25.5, 1.75], [25.95, 1.75], [81.7, 0.5], 
+            [61.6, 0.75], [29.8, 1.75], [29.81, 1.75], [17.17, 2.75], [10.39, 3.75], 
+            [28.4, 1.75], [28.69, 1.75], [81.3, 0.5], [60.9, 0.75], [16.65, 2.75], 
+            [10.05, 3.75], [28.9, 1.75], [28.95, 1.75]
+        ])
+
+        self.y_data = data[:,0]
+        self.x_data = data[:,1]
+
+    def model(self, b, x):
+        """y = exp[-b1*x] / (b2 + b3*x)"""
+        return np.exp(-b[0] * x) / (b[1] + b[2] * x)
+    
+    def F(self, b):
+        return self.model(b, self.x_data) - self.y_data
+    
+    def J(self, b):
+        x = self.x_data
+        J = np.zeros((self.m, self.n))
+
+        exp_term = np.exp(-b[0] * x)
+        denom = b[1] + b[2] * x
+
+        J[:,0] = -x * exp_term / denom
+        J[:,1] = -exp_term / denom**2
+        J[:,2] = -x * exp_term / denom**2
+
+        return J
+    
+    def get_starting_points(self):
+        return {
+            "NIST Start 1": np.array([0.1, 0.01, 0.02]),
+            "NIST Start 2": np.array([0.15, 0.008, 0.010])
+        }
+
+
+class Misra1aProblem(Problem):
+    """
+    Source: NIST
+    Level of Difficulty: Lower
+    Model Classification: Exponential
+    Number of Parameters: 2
+    Number of Observations: 14
+    """
+
+    def __init__(self):
+        super().__init__(
+            name="Misra1a",
+            n=2,
+            m=14,
+            difficulty="Lower",
+            classification_model="Exponential",
+            source="Observed",
+            certified_solution=np.array([
+                2.3894212918E+02,
+                5.5015643181E-04
+            ]),
+            certified_rss=1.2455138894E-01
+        )
+
+        data = np.array([
+            [10.07, 77.6],
+            [14.73, 114.9],
+            [17.94, 141.1],
+            [23.93, 190.8],
+            [29.61, 239.9],
+            [35.18, 289.0],
+            [40.02, 332.8],
+            [44.82, 378.4],
+            [50.76, 434.8],
+            [55.05, 477.3],
+            [61.01, 536.8],
+            [66.40, 593.1],
+            [75.47, 689.1],
+            [81.78, 760.0]
+        ])
+
+        self.y_data = data[:, 0]
+        self.x_data = data[:, 1]
+
+    def model(self, b, x):
+        """y = b1*(1-exp[-b2*x])"""
+        return b[0] * (1.0 - np.exp(-b[1] * x))
+
+    def F(self, b):
+        return self.model(b, self.x_data) - self.y_data
+
+    def J(self, b):
+        x = self.x_data
+
+        J = np.zeros((self.m, self.n))
+
+        exp_term = np.exp(-b[1] * x)
+
+        J[:, 0] = 1.0 - exp_term
+        J[:, 1] = b[0] * x * exp_term
+
+        return J
+
+    def get_starting_points(self):
+        return {
+            "NIST Start 1": np.array([500.0, 0.0001]),
+            "NIST Start 2": np.array([250.0, 0.0005])
+        }
+    
+
+class Lanczos3Problem(Problem):
+    """
+    Source: NIST
+    Level of Difficulty: Lower
+    Model Classification: Exponential
+    Number of Parameters: 6
+    Number of Observations: 24
+    """
+
+    def __init__(self):
+        super().__init__(
+            name="Lanczos3",
+            n=6,
+            m=24,
+            difficulty="Lower",
+            classification_model="Exponential",
+            source="Generated",
+            certified_solution=np.array([
+                8.6816414977E-02,
+                9.5498101505E-01,
+                8.4400777463E-01,
+                2.9515951832E+00,
+                1.5825685901E+00,
+                4.9863565084E+00
+            ]),
+            certified_rss=1.6117193594E-08
+        )
+
+        data = np.array([
+            [2.5134, 0.00],
+            [2.0443, 0.05],
+            [1.6684, 0.10],
+            [1.3664, 0.15],
+            [1.1232, 0.20],
+            [0.9269, 0.25],
+            [0.7679, 0.30],
+            [0.6389, 0.35],
+            [0.5338, 0.40],
+            [0.4479, 0.45],
+            [0.3776, 0.50],
+            [0.3197, 0.55],
+            [0.2720, 0.60],
+            [0.2325, 0.65],
+            [0.1997, 0.70],
+            [0.1723, 0.75],
+            [0.1493, 0.80],
+            [0.1301, 0.85],
+            [0.1138, 0.90],
+            [0.1000, 0.95],
+            [0.0883, 1.00],
+            [0.0783, 1.05],
+            [0.0698, 1.10],
+            [0.0624, 1.15]
+        ])
+
+        self.y_data = data[:, 0]
+        self.x_data = data[:, 1]
+
+    def model(self, b, x):
+        """
+        y = b1*exp(-b2*x)
+          + b3*exp(-b4*x)
+          + b5*exp(-b6*x)
+        """
+
+        return (
+            b[0] * np.exp(-b[1] * x)
+            + b[2] * np.exp(-b[3] * x)
+            + b[4] * np.exp(-b[5] * x)
+        )
+
+    def F(self, b):
+        return self.model(b, self.x_data) - self.y_data
+
+    def J(self, b):
+        x = self.x_data
+
+        J = np.zeros((self.m, self.n))
+
+        exp1 = np.exp(-b[1] * x)
+        exp2 = np.exp(-b[3] * x)
+        exp3 = np.exp(-b[5] * x)
+
+        J[:, 0] = exp1
+        J[:, 1] = -b[0] * x * exp1
+
+        J[:, 2] = exp2
+        J[:, 3] = -b[2] * x * exp2
+
+        J[:, 4] = exp3
+        J[:, 5] = -b[4] * x * exp3
+
+        return J
+
+    def get_starting_points(self):
+        return {
+            "NIST Start 1": np.array([1.2, 0.3, 5.6, 5.5, 6.5, 7.6]),
+            "NIST Start 2": np.array([0.5, 0.7, 3.6, 4.2, 4.0, 6.3])
+        }

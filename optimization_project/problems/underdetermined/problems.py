@@ -316,9 +316,8 @@ class Problem46Luksan(Problem):
         F_vec = np.zeros(self.m)
         
         for j in range(self.m):
-            i_block = j // 5  # Integer division to find the block index
+            i_block = j // 5 
             
-            # Compute the sum of cosines for the current block of 5 variables
             block_start = i_block * 5
             cos_sum = np.sum(np.cos(x[block_start : block_start + 5]))
             
@@ -412,6 +411,244 @@ class TrigonometricExponentialProblem(Problem):
     def get_starting_points(self):
         start1 = np.zeros(self.n)
 
+        return {
+            f"Luksan Standard Start (n={self.n})": start1,
+        }
+    
+
+class Problem23Rosenbrock(Problem):
+    """
+    Source: Extended Rosenbrock function (Luksan et al. - Problem 23)
+    Number of Parameters: n (User-defined)
+    Number of Observations: m (User-defined, m <= n)
+    """
+    def __init__(self, n=200, m=5):
+        if n < 2:
+            raise ValueError("Number of parameters n must be at least 2.")
+        if m > n:
+            raise ValueError(f"For n={n}, the maximum number of equations m is {n}.")
+            
+        super().__init__(
+            name=f"ExtendedRosenbrock_{n}x{m}", n=n, m=m,
+            difficulty="N/A", classification_model="N/A", source="Luksan",
+            certified_solution=None, certified_rss=None
+        )
+
+    def F(self, x):
+        F_vec = np.zeros(self.m)
+
+        for j in range(self.m):
+            if j % 2 == 0:  # mod(k,2) == 1
+                F_vec[j] = 10.0 * (x[j]**2 - x[j+1])
+            else:           # mod(k,2) == 0
+                F_vec[j] = x[j-1] - 1.0
+                
+        return F_vec
+    
+    def J(self, x):
+        J_mat = np.zeros((self.m, self.n))
+        
+        for j in range(self.m):
+            if j % 2 == 0:  # mod(k,2) == 1
+                J_mat[j, j] = 20.0 * x[j]
+                J_mat[j, j+1] = -10.0
+            else:           # mod(k,2) == 0
+                J_mat[j, j-1] = 1.0
+                
+        return J_mat
+
+    def get_starting_points(self):
+        start1 = np.zeros(self.n)
+        start1[0::2] = -1.2
+        start1[1::2] = 1.0
+        
+        return {
+            f"Luksan Standard Start (n={self.n})": start1,
+        }
+    
+
+class TridiagonalSystemProblem(Problem):
+    """
+    Source: Tridiagonal system (Luksan et al. - Problem 40)
+    Number of Parameters: n (User-defined)
+    Number of Observations: m (User-defined, m <= n)
+    """
+    def __init__(self, n=200, m=5):
+        if n < 2:
+            raise ValueError("Number of parameters n must be at least 2.")
+        if m > n:
+            raise ValueError(f"For n={n}, the maximum number of equations m is {n}.")
+            
+        super().__init__(
+            name=f"TridiagonalSystem_{n}x{m}", n=n, m=m,
+            difficulty="N/A", classification_model="N/A", source="Luksan",
+            certified_solution=None, certified_rss=None
+        )
+
+    def F(self, x):
+        F_vec = np.zeros(self.m)
+        
+        for j in range(self.m):
+            if j == 0:      # k == 1
+                F_vec[j] = 4.0 * (x[0] - x[1]**2)
+            elif j == self.n - 1:  # k == n
+                F_vec[j] = 8.0 * x[j] * (x[j]**2 - x[j-1]) - 2.0 * (1.0 - x[j])
+            else:           # 1 < k < n
+                F_vec[j] = 8.0 * x[j] * (x[j]**2 - x[j-1]) - 2.0 * (1.0 - x[j]) + 4.0 * (x[j] - x[j+1]**2)
+                
+        return F_vec
+    
+    def J(self, x):
+        J_mat = np.zeros((self.m, self.n))
+        
+        for j in range(self.m):
+            if j == 0:
+                J_mat[0, 0] = 4.0
+                J_mat[0, 1] = -8.0 * x[1]
+            elif j == self.n - 1:
+                J_mat[j, j-1] = -8.0 * x[j]
+                J_mat[j, j] = 24.0 * (x[j]**2) - 8.0 * x[j-1] + 2.0
+            else:
+                J_mat[j, j-1] = -8.0 * x[j]
+                J_mat[j, j] = 24.0 * (x[j]**2) - 8.0 * x[j-1] + 2.0 + 4.0
+                J_mat[j, j+1] = -8.0 * x[j+1]
+
+        return J_mat
+    
+    def get_starting_points(self):
+        start1 = np.ones(self.n) * 12.0
+        return {
+            f"Luksan Standard Start (n={self.n})": start1,
+        }
+    
+
+class SingularBroydenProblem(Problem):
+    """
+    Source: Singular Broyden problem (Luksan et al. - Problem 49)
+    Number of Parameters: n (User-defined)
+    Number of Observations: m (User-defined, m <= n)
+    """
+    def __init__(self, n=200, m=5):
+        if n < 2:
+            raise ValueError("Number of parameters n must be at least 2.")
+        if m > n:
+            raise ValueError(f"For n={n}, the maximum number of equations m is {n}.")
+            
+        super().__init__(
+            name=f"SingularBroyden_{n}x{m}", n=n, m=m,
+            difficulty="N/A", classification_model="N/A", source="Luksan",
+            certified_solution=None, certified_rss=None
+        )
+
+    def F(self, x):
+        F_vec = np.zeros(self.m)
+        
+        for j in range(self.m):
+            if j == 0:      # k == 1
+                inner = (3.0 - 2.0 * x[0]) * x[0] - 2.0 * x[1] + 1.0
+            elif j == self.n - 1:  # k == n
+                inner = (3.0 - 2.0 * x[j]) * x[j] - x[j-1] + 1.0
+            else:           # 1 < k < n
+                inner = (3.0 - 2.0 * x[j]) * x[j] - x[j-1] - 2.0 * x[j+1] + 1.0
+                
+            F_vec[j] = inner ** 2
+            
+        return F_vec
+    
+    def J(self, x):
+        J_mat = np.zeros((self.m, self.n))
+        
+        for j in range(self.m):
+            if j == 0:
+                inner = (3.0 - 2.0 * x[0]) * x[0] - 2.0 * x[1] + 1.0
+                # d/dx_0 [inner^2] = 2 * inner * (3 - 4*x_0)
+                J_mat[0, 0] = 2.0 * inner * (3.0 - 4.0 * x[0])
+                # d/dx_1 [inner^2] = 2 * inner * (-2)
+                J_mat[0, 1] = -4.0 * inner
+            elif j == self.n - 1:
+                inner = (3.0 - 2.0 * x[j]) * x[j] - x[j-1] + 1.0
+                J_mat[j, j-1] = -2.0 * inner
+                J_mat[j, j] = 2.0 * inner * (3.0 - 4.0 * x[j])
+            else:
+                inner = (3.0 - 2.0 * x[j]) * x[j] - x[j-1] - 2.0 * x[j+1] + 1.0
+                J_mat[j, j-1] = -2.0 * inner
+                J_mat[j, j] = 2.0 * inner * (3.0 - 4.0 * x[j])
+                J_mat[j, j+1] = -4.0 * inner
+                
+        return J_mat
+
+    def get_starting_points(self):
+        start1 = np.ones(self.n) * -1.0
+        return {
+            f"Luksan Standard Start (n={self.n})": start1,
+        }
+    
+
+class ExtendedWoodProblem(Problem):
+    """
+    Source: Extended Wood problem (Luksan et al. - Problem 56)
+    Level of Difficulty: N/A
+    Model Classification: N/A
+    Number of Parameters: n (User-defined, must be a multiple of 4)
+    Number of Observations: m (User-defined, m <= n)
+    """
+    def __init__(self, n=200, m=5):
+        if n % 4 != 0:
+            raise ValueError("Number of parameters n must be a multiple of 4 due to its 4-block structure.")
+        if m > n:
+            raise ValueError(f"For n={n}, the maximum number of equations m is {n}.")
+            
+        super().__init__(
+            name=f"ExtendedWood_{n}x{m}", n=n, m=m,
+            difficulty="N/A",
+            classification_model="N/A", 
+            source="Luksan",
+            certified_solution=None,
+            certified_rss=None
+        )
+    
+    def F(self, x):
+        F_vec = np.zeros(self.m)
+
+        for j in range(self.m):
+            if j % 4 == 0:    # mod(k,4) == 1
+                F_vec[j] = -200.0 * x[j] * (x[j+1] - x[j]**2) - (1.0 - x[j])
+            elif j % 4 == 1:  # mod(k,4) == 2
+                F_vec[j] = 200.0 * (x[j] - x[j-1]**2) + 20.2 * (x[j] - 1.0) + 19.8 * (x[j+1] - 1.0)
+            elif j % 4 == 2:  # mod(k,4) == 3
+                F_vec[j] = -180.0 * x[j] * (x[j+1] - x[j]**2) - (1.0 - x[j])
+            elif j % 4 == 3:  # mod(k,4) == 0
+                F_vec[j] = 180.0 * (x[j] - x[j-1]**2) + 20.2 * (x[j] - 1.0) + 19.8 * (x[j-1] - 1.0)
+                
+        return F_vec
+    
+    def J(self, x):
+        J_mat = np.zeros((self.m, self.n))
+        
+        for j in range(self.m):
+            if j % 4 == 0:    # mod(k,4) == 1
+                J_mat[j, j] = -200.0 * x[j+1] + 600.0 * (x[j]**2) + 1.0
+                J_mat[j, j+1] = -200.0 * x[j]
+                
+            elif j % 4 == 1:  # mod(k,4) == 2
+                J_mat[j, j-1] = -400.0 * x[j-1]
+                J_mat[j, j] = 200.0 + 20.2
+                J_mat[j, j+1] = 19.8
+                
+            elif j % 4 == 2:  # mod(k,4) == 3
+                J_mat[j, j] = -180.0 * x[j+1] + 540.0 * (x[j]**2) + 1.0
+                J_mat[j, j+1] = -180.0 * x[j]
+                
+            elif j % 4 == 3:  # mod(k,4) == 0
+                J_mat[j, j-1] = -360.0 * x[j-1] + 19.8
+                J_mat[j, j] = 180.0 + 20.2
+                
+        return J_mat
+    
+    def get_starting_points(self):
+        start1 = np.zeros(self.n)
+        start1[0::2] = -3.0
+        start1[1::2] = -1.0
         return {
             f"Luksan Standard Start (n={self.n})": start1,
         }

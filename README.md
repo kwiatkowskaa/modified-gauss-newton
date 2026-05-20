@@ -15,7 +15,7 @@ The implementation follows the framework proposed in:
 
 **`modified_gauss_newton.py`** - implementation of the Modified Gauss--Newton method.
 
-**`newton_with_secular_equation.py`** - solver for the trust-region subproblem based on the secular equation and the algorithm described in Chapter 7 of *Trust Region Methods*.
+**`newton_with_secular_equation.py`** - solver for the trust-region subproblem based on the secular equation and the algorithm described in *Trust Region Methods*.
 
 **`problems/`** - collection of benchmark nonlinear systems, including:
 - overdetermined problems,

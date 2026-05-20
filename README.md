@@ -1,8 +1,8 @@
 # Optimization Project
 
-Implementation of the **Modified Gauss--Newton method** together with a trust-region based solver for the associated \(L_2\)-norm subproblem.
+Implementation of the **Modified Gauss-Newton method** together with a trust-region based solver for the associated \(L_2\)-norm subproblem.
 
-The Modified Gauss--Newton scheme extends the classical Gauss--Newton method by introducing idea of quadratic regularization with the use of a sharp merit function.
+The Modified Gauss-Newton scheme extends the classical Gauss-Newton method by introducing idea of quadratic regularization with the use of a sharp merit function.
 
 The implementation follows the framework proposed in:
 
@@ -13,19 +13,15 @@ The implementation follows the framework proposed in:
 
 ## Main Components
 
-**`modified_gauss_newton.py`**
-Implementation of the Modified Gauss--Newton method.
+**`modified_gauss_newton.py`** - implementation of the Modified Gauss--Newton method.
 
-### `newton_with_secular_equation.py`
-Solver for the trust-region subproblem based on the secular equation and the algorithm described in Chapter 7 of *Trust Region Methods*.
+**`newton_with_secular_equation.py`** - solver for the trust-region subproblem based on the secular equation and the algorithm described in Chapter 7 of *Trust Region Methods*.
 
-### `problems/`
-Collection of benchmark nonlinear systems, including:
+**`problems/`** - collection of benchmark nonlinear systems, including:
 - overdetermined problems,
 - underdetermined problems.
 
-### `notebooks/`
-Numerical experiments, analysis, and visualization utilities.
+**`notebooks/`** - numerical experiments, analysis, and visualization utilities.
 
 ---
 
@@ -69,5 +65,5 @@ The notebooks compare the behavior of the implemented methods on different class
 
 ## Authors
 
-- Katsiaryna Bokhan — [GitHub](https://github.com/kateqwerty001)
-- Aleksandra Kwiatkowska — [GitHub](https://github.com/kwiatkowskaa)
+- Katsiaryna Bokhan ([GitHub](https://github.com/kateqwerty001))
+- Aleksandra Kwiatkowska ([GitHub](https://github.com/kwiatkowskaa))

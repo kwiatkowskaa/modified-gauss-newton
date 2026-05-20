@@ -185,7 +185,7 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
                 # 1. Modified Gauss-Newton (Secular)
                 # ---------------------------------------------------
                 res_sec = modified_gauss_newton(
-                    problem, x0, M0=1e-3, L0=1e-6, tol=1e-6, max_iter=100, subproblem_method="secular"
+                    problem, x0, M0=1e-3, L0=1e-6, tol=1e-6, max_iter=100
                 )
                 
                 # ---------------------------------------------------
@@ -239,7 +239,7 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
             frameon=True,
         )
     
-    fig.suptitle(f"Convergence Matrix (5x5) for {problem_cls.__name__}", y=0.98, fontsize=18)
+    fig.suptitle(f"Convergence Matrix (5x5) for {problem_cls.__name__}", y=0.98, fontsize=20)
     
     plt.tight_layout(rect=[0, 0, 1, 0.94]) 
     plt.show()

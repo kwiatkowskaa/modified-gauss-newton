@@ -37,6 +37,15 @@ pip install -e .
 
 ---
 
+## Benchmark Problems
+
+The `problems/` directory contains 23 nonlinear systems used to evaluate the algorithms:
+
+* **Overdetermined:** 13 problems sourced from the NIST Standard Reference Database [4]. These are systems with more equations than variables (m > n).
+* **Underdetermined:** 10 problems sourced from Lukšan et al. [5]. These are systems where the number of equations is less than the number of variables (m < n).
+  
+---
+
 ## Experiments
 
 The repository contains Jupyter notebooks for numerical experiments:
@@ -44,7 +53,7 @@ The repository contains Jupyter notebooks for numerical experiments:
 - `overdetermined_analysis.ipynb`
 - `underdetermined_analysis.ipynb`
 
-The notebooks compare the behavior of the implemented methods on different classes of nonlinear systems and provide visualization of convergence properties.
+The notebooks compare the behaviour of the implemented methods on different classes of nonlinear systems and provide visualization of convergence properties.
 
 ---
 
@@ -60,6 +69,13 @@ The notebooks compare the behavior of the implemented methods on different class
 3. Yu. Nesterov and B. T. Polyak,  
    *Cubic Regularization of Newton Method and Its Global Performance*,  
    Technical Report, Université catholique de Louvain, 2003.
+
+4. National Institute of Standards and Technology (NIST),  
+   *Standard Reference Datasets for Nonlinear Regression*. [Website](https://www.itl.nist.gov/div898/strd/nls/nls_main.shtml)
+
+5. L. Lukšan, C. Matonoha, and J. Vlček,  
+   *Sparse Test Problems for Unconstrained Optimization*,  
+   Technical Report V-1064, Prague, 2009. [PDF](https://www.cs.cas.cz/matonoha/download/V1064.pdf)
 
 ---
 

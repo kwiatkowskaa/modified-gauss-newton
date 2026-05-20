@@ -13,7 +13,7 @@ The implementation follows the framework proposed in:
 
 ## Main Components
 
-### `modified_gauss_newton.py`
+**`modified_gauss_newton.py`**
 Implementation of the Modified Gauss--Newton method.
 
 ### `newton_with_secular_equation.py`
@@ -52,7 +52,7 @@ The notebooks compare the behavior of the implemented methods on different class
 
 ---
 
-# References
+## References
 
 1. A. R. Conn, N. I. M. Gould, and Ph. L. Toint,  
    *Trust Region Methods*, SIAM, 2000.
@@ -67,7 +67,7 @@ The notebooks compare the behavior of the implemented methods on different class
 
 ---
 
-# Authors
+## Authors
 
-- Katsiaryna Bokhan — GitHub: `https://github.com/kateqwerty001`
-- Aleksandra Kwiatkowska — GitHub: `https://github.com/kwiatkowskaa`
+- Katsiaryna Bokhan — [GitHub](https://github.com/kateqwerty001)
+- Aleksandra Kwiatkowska — [GitHub](https://github.com/kwiatkowskaa)

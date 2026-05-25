@@ -60,25 +60,24 @@ class ChainedRosenbrockProblem(Problem):
         return {
             f"Luksan Standard Start (n={self.n})": start1,
         }
-    
 
-class ExtendedCraggLevyProblem(Problem):
+class Luksan72Problem(Problem):
     """
-    Source: Extended Cragg and Levy problem (Luksan et al. - Problem 53)
+    Source: Problem 72 (Problem 206 in [25])
     Level of Difficulty: N/A
     Model Classification: N/A
-    Number of Parameters: n (User-defined, must be a multiple of 4)
+    Number of Parameters: n (User-defined)
     Number of Observations: m (User-defined, m <= n)
     """
     def __init__(self, n=200, m=5):
-        if n % 4 != 0:
-            raise ValueError("Number of parameters n must be a multiple of 4 due to its block structure.")
+        if n < 2:
+            raise ValueError("Number of parameters n must be at least 2.")
         if m > n:
             raise ValueError(f"For n={n}, the maximum number of equations m is {n}; "
                              f"otherwise, the index will go out of bounds.")
             
         super().__init__(
-            name=f"ExtendedCraggLevy_{n}x{m}", n=n, m=m,
+            name=f"Luksan72_{n}x{m}", n=n, m=m,
             difficulty="N/A",
             classification_model="N/A", 
             source="Luksan",
@@ -88,51 +87,44 @@ class ExtendedCraggLevyProblem(Problem):
 
     def F(self, x):
         F_vec = np.zeros(self.m)
+        h = 1.0 / (self.n + 1)
+        h_sq = h ** 2
         
         for j in range(self.m):
-            rem = j % 4
-            if rem == 0:    # mod(k,4) == 1
-                F_vec[j] = (np.exp(x[j]) - x[j+1])**2
-            elif rem == 1:  # mod(k,4) == 2
-                F_vec[j] = 10.0 * (x[j] - x[j+1])**3
-            elif rem == 2:  # mod(k,4) == 3
-                F_vec[j] = np.tan(x[j] - x[j+1])**2
-            elif rem == 3:  # mod(k,4) == 0
-                F_vec[j] = x[j] - 1.0
+            val = -2.0 * x[j] - h_sq * np.exp(x[j])
+            
+            if j - 1 >= 0:
+                val += x[j-1]
                 
+            if j + 1 < self.n:
+                val += x[j+1]
+                
+            F_vec[j] = val
+            
         return F_vec
 
     def J(self, x):
         J_mat = np.zeros((self.m, self.n))
+        h = 1.0 / (self.n + 1)
+        h_sq = h ** 2
         
         for j in range(self.m):
-            rem = j % 4
-            if rem == 0:
-                diff = np.exp(x[j]) - x[j+1]
-                J_mat[j, j] = 2.0 * diff * np.exp(x[j])
-                J_mat[j, j+1] = -2.0 * diff
-            elif rem == 1:
-                diff_sq = 30.0 * ((x[j] - x[j+1])**2)
-                J_mat[j, j] = diff_sq
-                J_mat[j, j+1] = -diff_sq
-            elif rem == 2:
-                tan_val = np.tan(x[j] - x[j+1])
-                der = 2.0 * tan_val * (1.0 + tan_val**2)
-                J_mat[j, j] = der
-                J_mat[j, j+1] = -der
-            elif rem == 3:
-                J_mat[j, j] = 1.0
+            J_mat[j, j] = -2.0 - h_sq * np.exp(x[j])
+            
+            if j - 1 >= 0:
+                J_mat[j, j-1] = 1.0
+                
+            if j + 1 < self.n:
+                J_mat[j, j+1] = 1.0
                 
         return J_mat
 
     def get_starting_points(self):
-        start1 = np.ones(self.n) * 2.0
-        start1[0::4] = 1.0
-
+        start1 = np.ones(self.n)
+        
         return {
-            f"Luksan Standard Start (n={self.n})": start1,
+            f"Standard Start (n={self.n})": start1,
         }
-
 
 class TridiagonalExponentialProblem(Problem):
     """
@@ -230,7 +222,7 @@ class Luksan76Problem(Problem):
                              f"otherwise, the index will go out of bounds.")
             
         super().__init__(
-            name=f"DiscreteBVP_{n}x{m}", n=n, m=m,
+            name=f"Luksan76_{n}x{m}", n=n, m=m,
             difficulty="N/A",
             classification_model="N/A", 
             source="Luksan",
@@ -304,7 +296,7 @@ class Luksan46Problem(Problem):
                              f"otherwise, the index will go out of bounds.")
             
         super().__init__(
-            name=f"Problem46_{n}x{m}", n=n, m=m,
+            name=f"Luksan46_{n}x{m}", n=n, m=m,
             difficulty="N/A",
             classification_model="N/A", 
             source="Luksan",

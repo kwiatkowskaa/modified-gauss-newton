@@ -138,11 +138,11 @@ def plot_boxplot_with_connections(df, x, y, xlabel, ylabel, order=None, palette=
     plt.show()
 
 
-def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=None):
     """
     Generates a 5x5 matrix of convergence subplots (RSS vs Iterations) 
     for a given problem class.
-    Compares the Modified Gauss-Newton (Secular) approach against SciPy Least Squares (trf or lm used).
+    Compares the Modified Gauss-Newton (Secular) approach against SciPy Least Squares.
+    Prints mean and standard deviation for final RSS and iteration counts.
     """
     if len(n_values) != 5 or len(m_values) != 5:
         raise ValueError("Both n_values and m_values must contain exactly 5 elements.")
@@ -150,11 +150,17 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
     if method_palette is None:
         raise ValueError("Provide palette of colours.")
 
-    fig, axes = plt.subplots(5, 5, figsize=(15, 12), sharex=True, sharey=True)
+    fig, axes = plt.subplots(5, 5, figsize=(12, 9), sharex=True, sharey=True, dpi=300)
     
     print(f"Initializing enhanced 5x5 convergence matrix for {problem_cls.__name__}...")
     
     legend_handles = None
+    
+    mgn_final_rss = []
+    mgn_iterations = []
+    
+    scipy_final_rss = []
+    scipy_iterations = []
     
     for i, n in enumerate(n_values):
         print(f"Processing matrix row {i+1}/5 (n = {n})...")
@@ -188,6 +194,12 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
                     problem, x0, M0=1e-3, L0=1e-6, tol=1e-6, max_iter=100
                 )
                 
+                final_rss_mgn = res_sec.rss_history[-1]
+                iters_mgn = len(res_sec.rss_history) - 1
+                
+                mgn_final_rss.append(final_rss_mgn)
+                mgn_iterations.append(iters_mgn)
+                
                 # ---------------------------------------------------
                 # 2. SciPy Least Squares 
                 # ---------------------------------------------------
@@ -198,22 +210,29 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
                 
                 scipy_method = "lm" if problem.m >= problem.n else "trf"
                 try:
-                    least_squares(
+                    res_sp = least_squares(
                         fun=wrapped_F, jac=problem.J, x0=x0, method=scipy_method,
                         ftol=1e-6, xtol=1e-6, gtol=1e-6, max_nfev=100
                     )
                     hist_sp = [np.sum(problem.F(x) ** 2) for x in x_history]
+                    
+                    iters_sp = res_sp.niter if hasattr(res_sp, 'niter') else len(hist_sp) - 1
+                    final_rss_sp = hist_sp[-1]
+                    
+                    scipy_final_rss.append(final_rss_sp)
+                    scipy_iterations.append(iters_sp)
                 except Exception:
                     hist_sp = [] 
                 
                 rss_sec = np.clip(res_sec.rss_history, 1e-32, None)
                 rss_sp = np.clip(hist_sp, 1e-32, None)
                 
-                line_sec, = ax.semilogy(rss_sec, color=method_palette.get("ModifiedGN"), linewidth=2)
-                line_sp,  = ax.semilogy(rss_sp, color=method_palette.get("LM-lm"), linewidth=2)
+                line_sec, = ax.semilogy(rss_sec, color=method_palette.get("ModifiedGN"), linewidth=1.5)
                 
-                if legend_handles is None:
-                    legend_handles = [line_sec, line_sp]
+                if len(hist_sp) > 0:
+                    line_sp, = ax.semilogy(rss_sp, color=method_palette.get("LM-lm"), linewidth=1.5)
+                    if legend_handles is None:
+                        legend_handles = [line_sec, line_sp]
                 
                 ax.text(0.95, 0.95, f"n: {n}\nm: {m}", color='black',
                         ha='right', va='top', transform=ax.transAxes, 
@@ -226,12 +245,12 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
             if i == 4:
                 ax.set_xlabel("Iteration", fontsize=12)
             if j == 0:
-                ax.set_ylabel("RSS", fontsize=12)
+                ax.set_ylabel("$\|F(x)\|^2$", fontsize=12)
 
     if legend_handles is not None:
         fig.legend(
             legend_handles, 
-            ["Modified GN", "SciPy (LM/TRF)"],
+            ["Modified GN", "SciPy"],
             loc="upper center", 
             bbox_to_anchor=(0.5, 0.95),
             ncol=2, 
@@ -239,11 +258,184 @@ def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=No
             frameon=True,
         )
     
-    fig.suptitle(f"Convergence Matrix (5x5) for {problem_cls.__name__}", y=0.98, fontsize=20)
+    fig.suptitle(f"Convergence Matrix (5x5) for {problem_cls.__name__}", y=0.98, fontsize=13)
+    
+    plt.tight_layout(rect=[0, 0, 1, 0.94])
+    plt.show()
+    
+    print("\n" + "="*60)
+    print(f" STATISTICAL SUMMARY FOR {problem_cls.__name__.upper()} ")
+    print("="*60)
+    
+    if len(mgn_final_rss) > 0:
+        print(f"{'Metric':<20} | {'Modified GN':<18} | {'SciPy':<18}")
+        print("-"*60)
+        
+        mean_rss_mgn, std_rss_mgn = np.mean(mgn_final_rss), np.std(mgn_final_rss)
+        mean_rss_sp, std_rss_sp = np.mean(scipy_final_rss), np.std(scipy_final_rss) if scipy_final_rss else (0.0, 0.0)
+        print(f"{'Mean Final $\|F(x)\|^2$':<20} | {mean_rss_mgn:<18.4e} | {mean_rss_sp:<18.4e}")
+        print(f"{'Std Final $\|F(x)\|^2$':<20} | {std_rss_mgn:<18.4e} | {std_rss_sp:<18.4e}")
+        print("-"*60)
+        
+        mean_iter_mgn, std_iter_mgn = np.mean(mgn_iterations), np.std(mgn_iterations)
+        mean_iter_sp, std_iter_sp = np.mean(scipy_iterations), np.std(scipy_iterations) if scipy_iterations else (0.0, 0.0)
+        print(f"{'Mean Iterations':<20} | {mean_iter_mgn:<18.2f} | {mean_iter_sp:<18.2f}")
+        print(f"{'Std Iterations':<20} | {std_iter_mgn:<18.2f} | {std_iter_sp:<18.2f}")
+    else:
+        print("No valid configurations were evaluated to generate statistics.")
+    print("="*60 + "\n")
+
+def plot_convergence_grid_5x5(problem_cls, n_values, m_values, method_palette=None):
+    """
+    Generates a 5x5 matrix of convergence subplots (RSS vs Iterations) 
+    for a given problem class.
+    Compares the Modified Gauss-Newton (Secular) approach against SciPy Least Squares.
+    Prints robust mean and standard deviation for final RSS and iteration counts.
+    """
+    if len(n_values) != 5 or len(m_values) != 5:
+        raise ValueError("Both n_values and m_values must contain exactly 5 elements.")
+        
+    if method_palette is None:
+        raise ValueError("Provide palette of colours.")
+
+    fig, axes = plt.subplots(5, 5, figsize=(12, 9), sharex=True, sharey=True, dpi=300)
+    
+    print(f"Initializing enhanced 5x5 convergence matrix for {problem_cls.__name__}...")
+    
+    legend_handles = None
+    
+    mgn_final_rss = []
+    mgn_iterations = []
+    
+    scipy_final_rss = []
+    scipy_iterations = []
+    
+    for i, n in enumerate(n_values):
+        print(f"Processing matrix row {i+1}/5 (n = {n})...")
+        for j, m in enumerate(m_values):
+            ax = axes[i, j]
+            
+            try:
+                problem = problem_cls(n=n, m=m)
+                starts = problem.get_starting_points()
+                start_name = list(starts.keys())[0]
+                x0 = starts[start_name]
+                valid_geometry = True
+            except Exception:
+                # Gray out cells that violate structural problem limits
+                ax.set_facecolor('#d9d9d9') 
+                ax.text(0.5, 0.5, f"Invalid\nGeometry\nn={n}\nm={m}", 
+                        color='#555555',
+                        ha='center', va='center', transform=ax.transAxes)
+                valid_geometry = False
+                
+            if valid_geometry:
+                if m < n:
+                    ax.set_facecolor('#e6f2ff')
+                else:
+                    ax.set_facecolor('#fff9f0')
+
+                # ---------------------------------------------------
+                # 1. Modified Gauss-Newton (Secular)
+                # ---------------------------------------------------
+                res_sec = modified_gauss_newton(
+                    problem, x0, M0=1e-3, L0=1e-6, tol=1e-6, max_iter=100
+                )
+                
+                final_rss_mgn = res_sec.rss_history[-1]
+                iters_mgn = len(res_sec.rss_history) - 1
+                
+                mgn_final_rss.append(final_rss_mgn)
+                mgn_iterations.append(iters_mgn)
+                
+                # ---------------------------------------------------
+                # 2. SciPy Least Squares 
+                # ---------------------------------------------------
+                x_history = []
+                def wrapped_F(x):
+                    x_history.append(x.copy())
+                    return problem.F(x)
+                
+                scipy_method = "lm" if problem.m >= problem.n else "trf"
+                try:
+                    res_sp = least_squares(
+                        fun=wrapped_F, jac=problem.J, x0=x0, method=scipy_method,
+                        ftol=1e-6, xtol=1e-6, gtol=1e-6, max_nfev=100
+                    )
+                    hist_sp = [np.sum(problem.F(x) ** 2) for x in x_history]
+                    
+                    iters_sp = res_sp.niter if hasattr(res_sp, 'niter') else len(hist_sp) - 1
+                    final_rss_sp = hist_sp[-1]
+                except Exception:
+                    hist_sp = [] 
+                    iters_sp = np.nan
+                    final_rss_sp = np.nan
+                
+                scipy_final_rss.append(final_rss_sp)
+                scipy_iterations.append(iters_sp)
+                
+                rss_sec = np.clip(res_sec.rss_history, 1e-20, None)
+                rss_sp = np.clip(hist_sp, 1e-20, None)
+                
+                line_sec, = ax.semilogy(rss_sec, color=method_palette.get("ModifiedGN"), linewidth=1.5)
+                
+                if len(hist_sp) > 0:
+                    line_sp,  = ax.semilogy(rss_sp, color=method_palette.get("LM-lm"), linewidth=1.5)
+                    if legend_handles is None:
+                        legend_handles = [line_sec, line_sp]
+                
+                ax.text(0.95, 0.95, f"n: {n}\nm: {m}", color='black',
+                        ha='right', va='top', transform=ax.transAxes, 
+                        bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none", alpha=0.75))
+                
+                ax.grid(True, which="both", ls="-", alpha=0.2)
+            
+            ax.tick_params(axis='both', which='major')
+            
+            if i == 4:
+                ax.set_xlabel("Iteration", fontsize=12)
+            if j == 0:
+                ax.set_ylabel("$\|F(x)\|^2$", fontsize=12)
+
+    if legend_handles is not None:
+        fig.legend(
+            legend_handles, 
+            ["Modified GN", "SciPy"],
+            loc="upper center", 
+            bbox_to_anchor=(0.5, 0.95),
+            ncol=2, 
+            fontsize=12,
+            frameon=True,
+        )
+    
+    fig.suptitle(f"Convergence Matrix (5x5) for {problem_cls.__name__}", y=0.98, fontsize=13)
     
     plt.tight_layout(rect=[0, 0, 1, 0.94]) 
     plt.show()
 
+    print("\n" + "="*60)
+    print(f" STATISTICAL SUMMARY FOR {problem_cls.__name__.upper()} ")
+    print("="*60)
+    
+    if len(mgn_final_rss) > 0:
+        print(f"{'Metric':<20} | {'Modified GN':<18} | {'SciPy':<18}")
+        print("-"*60)
+        
+        mean_rss_mgn, std_rss_mgn = np.nanmean(mgn_final_rss), np.nanstd(mgn_final_rss)
+        mean_rss_sp, std_rss_sp = np.nanmean(scipy_final_rss), np.nanstd(scipy_final_rss)
+        
+        print(f"{'Mean Final |F(x)|^2':<20} | {mean_rss_mgn:<18.4e} | {mean_rss_sp:<18.4e}")
+        print(f"{'Std Final |F(x)|^2':<20} | {std_rss_mgn:<18.4e} | {std_rss_sp:<18.4e}")
+        print("-"*60)
+        
+        mean_iter_mgn, std_iter_mgn = np.nanmean(mgn_iterations), np.nanstd(mgn_iterations)
+        mean_iter_sp, std_iter_sp = np.nanmean(scipy_iterations), np.nanstd(scipy_iterations)
+        
+        print(f"{'Mean Iterations':<20} | {mean_iter_mgn:<18.2f} | {mean_iter_sp:<18.2f}")
+        print(f"{'Std Iterations':<20} | {std_iter_mgn:<18.2f} | {std_iter_sp:<18.2f}")
+    else:
+        print("No valid configurations were evaluated to generate statistics.")
+    print("="*60 + "\n")
 
 def plot_optimizer_paths(
     problem_data,

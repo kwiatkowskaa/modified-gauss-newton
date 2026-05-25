@@ -214,9 +214,9 @@ class TridiagonalExponentialProblem(Problem):
         }
 
 
-class DiscreteBoundaryValueProblem(Problem):
+class Luksan76Problem(Problem):
     """
-    Source: Discrete Boundary Value Problem (Luksan et al. - Problem 76 / Problem 213)
+    Source: Luksan et al. - Problem 76 / Problem 213
     Level of Difficulty: N/A
     Model Classification: N/A
     Number of Parameters: n (User-defined)
@@ -290,7 +290,7 @@ class DiscreteBoundaryValueProblem(Problem):
 
 class Luksan46Problem(Problem):
     """
-    Source: Transcendental Block System (Luksan et al. - Problem 46)
+    Source: Luksan et al. - Problem 46
     Level of Difficulty: N/A
     Model Classification: N/A
     Number of Parameters: n (User-defined, must be a multiple of 5)

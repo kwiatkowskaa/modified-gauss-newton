@@ -214,9 +214,6 @@ class NewtonSecularEquationSolver:
                     # step 5b
                     self.lam_L = max(self.lam_L, lam_plus)
                     
-                    # check lambda_L for interior concergence
-                    pass
-                    
                     lam = self._find_lambda_uncertainty(uncertainty_method, self.lam_L, self.lam_U)
             else:
                 # lam is in N
